@@ -23,9 +23,9 @@ class CrawlerPipeline(object):
         port = '5432'
         self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database, port=port)
         self.cur = self.connection.cursor()
-        self.cur.execute("DELETE FROM events_event;")
-        self.connection.commit()
-        print('datebase deleted')
+        # self.cur.execute("DELETE FROM events_event;")
+        # self.connection.commit()
+        # print('datebase deleted')
 
     # def open_spider(self, spider):
     #
