@@ -3,4 +3,4 @@
 #image
 #nameparser
 #pillow
-#psycopg2
+psycopg2
