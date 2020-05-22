@@ -56,8 +56,8 @@ class eventbrite_events(Spider):
 
 
     def parse_page(self, response):
-        event_title = response.meta.extract_first('event_title')
-        # print(event_title)
+        event_title = response.meta.get('event_title')
+        print(event_title)
         # print(response)
         sidebar = response.xpath('.//div[@class="event-details hide-small"]')
 
@@ -77,8 +77,8 @@ class eventbrite_events(Spider):
             end_time = None
 
 
-        absolute_url = response.meta.extract_first('absolute_url')
-        # events_date = response.meta.extract_first('events_date')
+        absolute_url = response.meta.get('absolute_url')
+        # events_date = response.meta.get('events_date')
 
         event_description = response.xpath('//div[contains(@class,"has-user-generated-content")]//text()').extract()
 
