@@ -4,3 +4,4 @@
 #nameparser
 #pillow
 psycopg2
+dateutil>=2.7.0
