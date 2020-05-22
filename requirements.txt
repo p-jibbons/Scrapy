@@ -1,0 +1,5 @@
+#scrapy
+#xlsxwriter
+#image
+#nameparser
+#pillow
