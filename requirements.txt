@@ -1,4 +1,0 @@
-scrapy
-xlsxwriter
-image
-nameparser

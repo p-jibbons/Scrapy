@@ -8,44 +8,83 @@
 import scrapy
 
 
+from scrapy import Field
+
+
 
 class eventPageItem(scrapy.Item):
     # define the fields for your item here like:
-    # summary of event details
-    event_source = scrapy.Field()
-    event_source_id = scrapy.Field()
-    event_source_url = scrapy.Field()
-    title = scrapy.Field()
-    is_cancelled = scrapy.Field()
-    published = scrapy.Field()
-    summary = scrapy.Field()
-    image_url = scrapy.Field()
-    default_message = scrapy.Field()
-    sales_status = scrapy.Field()
-    message = scrapy.Field()
-    message_code = scrapy.Field()
-    message_type = scrapy.Field()
-    is_sold_out = scrapy.Field()
-    is_free = scrapy.Field()
-    min_ticket_price = scrapy.Field()
-    max_ticket_price = scrapy.Field()
-    tickets_url = scrapy.Field()
-    tickets_by = scrapy.Field()
-    start_date = scrapy.Field()
-    start_time = scrapy.Field()
-    end_date = scrapy.Field()
-    end_time = scrapy.Field()
-    country = scrapy.Field()
-    region = scrapy.Field()
-    city = scrapy.Field()
-    postal_code = scrapy.Field()
-    localized_address_display = scrapy.Field()
-    localized_area_display = scrapy.Field()
-    address_1 = scrapy.Field()
-    latitude = scrapy.Field()
-    longitude = scrapy.Field()
-    venue_name = scrapy.Field()
-    venue_profile_url = scrapy.Field()
-    source_venue_id = scrapy.Field()
-    venue_age_restrictions = scrapy.Field()
-    categories = scrapy.Field()
+
+    # text about event
+    # event_sha1 = models.CharField(max_length=255)
+    event_title = Field()
+    event_description = Field()
+
+    # time date properties
+    start_date = Field()
+    end_date = Field()
+    start_time = Field()
+    end_time = Field()
+    event_datetime_string = Field()
+
+    # event source properties
+    scrape_source_name = Field()
+    scrape_source_url = Field()
+    original_source_name = Field()
+    original_source_url = Field()
+
+    # event ticket propeties
+    buy_tickets_url = Field()
+    tickets_by = Field()
+    ticket_vendor_image_url = Field()
+    tickets_sold_out = Field()
+
+    # event location properties
+    venue_name = Field()
+    venue_url = Field()
+    venue_event_url = Field()
+
+    venue_address_string = Field()
+    venue_address1 = Field()
+    venue_address2 = Field()
+    venue_city = Field()
+    venue_state = Field()
+    venue_country = Field()
+    venue_postal_code = Field()
+    venue_neighbourhood = Field()
+    venue_latitude = Field()
+    venue_longitude = Field()
+    venue_gmap_url = Field()
+
+    # event cost properties
+    cost_string = Field()
+    cost_min_extract = Field()
+    cost_max_extract = Field()
+    cost_is_free = Field()
+
+    # event_meta_properties
+    age_restrictions_string = Field()
+    age_minimum = Field()
+    is_cancelled = Field()
+
+    # event image properties
+    image_original_url = Field()
+    image_s3_url = Field()
+    image_height = Field()
+    image_width = Field()
+    image_urls= Field()
+    images = Field()
+
+    # event contact properties
+    contact_phone = Field()
+    contact_email = Field()
+
+    # storagee meta properties
+    spider_name = Field()
+    spider_scrape_datetime = Field()
+    date_added = Field()
+    date_updated = Field()
+    date_last_seen = Field()
+    suspected_duplicate_event = Field()
+    inappropriate_events = Field()
+

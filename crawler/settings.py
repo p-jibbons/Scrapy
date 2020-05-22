@@ -1,91 +1,43 @@
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for crawler project
-#
-# For simplicity, this file contains only settings considered important or
-# commonly used. You can find more settings consulting the documentation:
-#
-#     http://doc.scrapy.org/en/latest/topics/settings.html
-#     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-#     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
+from datetime import datetime
 BOT_NAME = 'crawler'
 
 SPIDER_MODULES = ['crawler.spiders']
 NEWSPIDER_MODULE = 'crawler.spiders'
 
 
-# FEED_EXPORTERS = { 'csv': 'digicamdb.csvexporter.CSVkwItemExporter' }
-# EXPORT_FIELDS = ['targetzipcode', 'doctor', 'spec', 'coname', 'address', 'city', 'state', 'zipcode', 'phone', 'proc', 'price']
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'digicamdb (+http://www.yourdomain.com)'
+import  datetime
+today = datetime.date.today()
+FEED_FORMAT = 'csv'
+FEED_URI = 's3://relayplay-prebackend/ev_scrapedata/' + today.strftime("%Y/%m/%d") + '/eventbrite_events.csv'
+IMAGES_STORE = 's3://relayplay-prebackend/images'
+
+IMAGES_URLS_FIELD = 'image_original_url'
+IMAGES_RESULT_FIELD = 'image_s3_url'
+# IMAGES_STORE_S3_ACL = 'public-read'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
+CLOSESPIDER_PAGECOUNT = 2000
 
-# Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 16
-# REACTOR_THREADPOOL_MAXSIZE = 16
-# REDIRECT_ENABLED = False
+
 
 # Configure a delay for requests for the same website (default: 0)
-# See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
-# See also autothrottle settings and docs
+
 DOWNLOAD_DELAY = 1
 DOWNLOAD_TIMEOUT = 360
-# The download delay setting will honor only one of:
-# CONCURRENT_REQUESTS_PER_DOMAIN = 32
-# CONCURRENT_REQUESTS_PER_IP = 32
+
 
 # Disable cookies (enabled by default)
 COOKIES_ENABLED = True
 
-# Disable Telnet Console (enabled by default)
-#TELNETCONSOLE_ENABLED = False
+#
 
-# Override the default request headers:
-# DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Encoding': 'gzip, deflate, sdch, br',
-#   'Accept-Language': 'tr-TR,tr;q=0.8,en-US;q=0.6,en;q=0.4',
-#   'Cache-Control': 'max-age=0',
-#   'Connection': 'keep-alive',
-#   'Host': 'www.amazon.com',
-#   'Upgrade-Insecure-Requests': '1'
-# }
 
-# Enable or disable spider middlewares
-# See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    'digicamdb.middlewares.OneworkSpiderMiddleware': 543,
-#}
 
-# Enable or disable downloader middlewares
-# See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-DOWNLOADER_MIDDLEWARES = {
-	'crawler.middlewares.ProxyMiddleware': 100,
-    # 'crawler.randomizedproxy.RandomizedProxy': 100,
-    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
-    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-    # 'scrapy_crawlera.CrawleraMiddleware': 300,
-    'crawler.middlewares.RandomUserAgentMiddleware': 400,
-	
-    'crawler.middlewares.CustomCookiesMiddleware': 700,
-	'scrapy.downloadermiddlewares.cookies.CookiesMiddleware': None,
-	
-# 	'scrapy_splash.SplashCookiesMiddleware': 723,
-#     'scrapy_splash.SplashMiddleware': 725,
-#     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
-	# 'crawler.retry.RetryMiddleware': 750,
-}
-
-# SPLASH_URL = 'http://91.186.8.169:8050'
-# SPIDER_MIDDLEWARES = {
-#     'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
-# }
-# DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
-# HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
 
 MOBILE_USER_AGENT_LIST = [
     "Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.133 Mobile Safari/535.19",
@@ -169,48 +121,29 @@ USER_AGENT_LIST = [
 	"Mozilla/5.0 (Windows NT 6.1; Win64; x64; Trident/7.0; rv:11.0) like Gecko",
 ]
 
-# Enable or disable extensions
-# See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-#}
 
 # Configure item pipelines
-# See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+	'scrapy.pipelines.images.ImagesPipeline': 100,
     'crawler.pipelines.CrawlerPipeline': 300,
 }
-# IMAGES_STORE = 'data'
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
-AUTOTHROTTLE_ENABLED = False
-# The initial download delay
+AUTOTHROTTLE_ENABLED = True
 AUTOTHROTTLE_START_DELAY = .3
-# The maximum download delay to be set in case of high latencies
 AUTOTHROTTLE_MAX_DELAY = 1.5
-# The average number of requests Scrapy should be sending in parallel to
-# each remote server
-#AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
-# Enable showing throttling stats for every response received:
 AUTOTHROTTLE_DEBUG = False
 
-# Enable and configure HTTP caching (disabled by default)
-# See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-HTTPCACHE_ENABLED = True
-HTTPCACHE_EXPIRATION_SECS = 60*60*24*30
-#HTTPCACHE_DIR = 'httpcache'
-HTTPCACHE_IGNORE_HTTP_CODES = [500, 503, 504, 400, 401, 403, 404, 405, 407, 408, 416, 456, 502, 429]
-#HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-HTTPCACHE_POLICY = 'crawler.policies.CustomPolicy'
+
 
 # Retry many times since proxies often fail
 RETRY_TIMES = 3
-# Retry on most error codes since proxies fail for different reasons
 RETRY_HTTP_CODES = [500, 503, 504, 400, 401, 403, 404, 405, 407, 408, 416, 456, 502, 429]
 
-# LOG_FILE = "scrapy.log"
-#LOG_LEVEL = 'INFO'
-LOG_STDOUT = True
-LOG_ENABLED=True
+# # LOG_FILE = "scrapy.log"
+# LOG_LEVEL = 'ERROR'
+# LOG_STDOUT = True
+LOG_ENABLED=False
 

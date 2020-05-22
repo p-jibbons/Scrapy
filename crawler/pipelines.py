@@ -3,122 +3,115 @@
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
-from scrapy.exceptions import DropItem
-# from scrapy.pipelines.images import ImagesPipeline
-from scrapy import Request
-from datetime import datetime
-from nameparser import HumanName
-import string
-import re, os
-import scrapy
-from scrapy.pipelines.images import ImagesPipeline
-from scrapy.exceptions import DropItem
+# See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
+import psycopg2
+# import mysql.connector
+# from .sql_statements import insert_event_sql
+
+
+
+
 
 
 class CrawlerPipeline(object):
 
-    def __init__(self):
-        self.ids_seen = set()
-        
+    def open_spider(self, spider):
+        hostname = 'ec2-52-6-143-153.compute-1.amazonaws.com'
+        username = 'jowgcbbjlvqmop'
+        password = '2597fd295caa3bc47b21d30deefb4498ce4bdc59f0d3210947ea4026a9e8b063' # your password
+        database = 'd7dq8ub5ap4ncg'
+        port = '5432'
+        self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database, port=port)
+        self.cur = self.connection.cursor()
+        self.cur.execute("DELETE FROM events_event;")
+        self.connection.commit()
+        print('datebase deleted')
+
+    # def open_spider(self, spider):
+    #
+    #     self.connection = mysql.connector.connect(
+    #         host="development.relayplay.com",
+    #         user="r1baldwi_develop",
+    #         passwd="0bZyPQ[304zZ",
+    #         database='r1baldwi_development'
+    #     )
+    #
+    #     self.cur = self.connection.cursor()
+    #     self.cur.execute("DELETE FROM wp_rp_events_live;")
+    #     self.connection.commit()
+    #     print('datebase deleted')
+
+    def close_spider(self, spider):
+        self.cur.close()
+        self.connection.close()
+        print('spider closed')
+
     def process_item(self, item, spider):
-        
-        for field in item.keys():
-            if item[field]:
-                if isinstance(item[field], str):
-                    item[field] = item[field].strip()
-                
-        if "Price" in item and item["Price"]:
-            item["Price"] = item["Price"].replace("$", "").strip()
-            
-        # if "MFRPart #" not in item or not item["MFRPart #"] or len(item["MFRPart #"]) == 0:
-        #     item["MFRPart #"] = item["SKU"]
-            
-        # item["ScrapeDate"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        return item
-        
-# class MyImagesPipeline(ImagesPipeline):
-    
-#     def file_path(self, request, response=None, info=None):
-#         return request.meta.get('filename','')
+        if item.get('image_original_url')[0]:
+            item['image_original_url'] = item.get('image_original_url')[0]
+        else:
+            item['image_original_url'] = ''
 
-#     def get_media_requests(self, item, info):
-#         if os.path.exists("images/" + item["ImageName"]):
-#             print "Already have image: " + item["ImageName"]
-        
-#         if not os.path.exists("images/" + item["ImageName"]) and "ImageUrl" in item and item["ImageUrl"]:
-#             yield Request(item["ImageUrl"], meta={"filename": item["ImageName"]})
+        if item.get('image_s3_url')[0]:
+            thisdict = item.get('image_s3_url')[0]
+            item['image_s3_url'] = thisdict["path"]
+            print(item['image_s3_url'])
+        else:
+            item['image_s3_url'] = ''
 
-class HumanEmailPipeline(object):
 
-    def __init__(self):
-        self.ids_seen = set()
-        
-    def process_item(self, item, spider):
-        
-        for k in item.keys():
-            if not item[k]:
-                item[k] = ""
-            item[k] = item[k].strip()
-        
-        if "FullName" in item:
-                    
-            item["FullName"] = item["FullName"].strip()
-            name = HumanName(item["FullName"])
-            
-            item["First"] = name.first
-            item["Middle"] = name.middle
-            item["Last"] = name.last
-        
-        if "Email" in item and len(item["Email"].strip()) > 0:
-            if item['Email'] in self.ids_seen:
-                raise DropItem("Duplicate item found: %s" % item)
-            else:
-                self.ids_seen.add(item['Email'])
-        
-        return item
-        
-class CustomImagePipeLine(ImagesPipeline):
-    DEFAULT_IMAGES_URLS_FIELD = "image_url"
-    @classmethod
-    def from_crawler(cls, crawler):
         try:
-            pipe = cls.from_settings(crawler)
-        except AttributeError:
-            pipe = cls()
-        pipe.crawler = crawler
-        return pipe
+            spider_fields = ['event_title',
+                                'event_description',
+                                'image_original_url',
+                                'image_s3_url',
+                                'start_date',
+                                'end_date',
+                                'start_time',
+                                'end_time',
+                                'event_datetime_string',
+                                'scrape_source_name',
+                                'scrape_source_url',
+                                'buy_tickets_url',
+                                'tickets_by',
+                                'tickets_sold_out',
+                                'venue_name',
+                                # 'venue_url',
+                                'venue_address_string',
+                                'venue_city',
+                                'venue_state',
+                                'venue_country',
+                                'venue_postal_code',
+                                'venue_longitude',
+                                'venue_latitude',
+                                # 'venue_neighbourhood',
+                                'venue_gmap_url',
+                                'cost_string',
+                                'cost_min_extract',
+                                'cost_max_extract',
+                                'cost_is_free',
+                                'age_restrictions_string',
+                                'spider_name',
+                                'spider_scrape_datetime',
+                                'date_added'
+                                ]
 
-    @classmethod
-    def from_settings(cls, crawler):
-        settings = crawler.settings
-        s3store = cls.STORE_SCHEMES['s3']
-        s3store.AWS_ACCESS_KEY_ID = settings['AWS_ACCESS_KEY_ID']
-        s3store.AWS_SECRET_ACCESS_KEY = settings['AWS_SECRET_ACCESS_KEY']
-        s3store.POLICY = "public-read" # settings['IMAGES_STORE_S3_ACL']
+            # insert_event_sql = 'insert into events_event(' + ','.join(spider_fields) + ') VALUES (' + ','.join(['%s'] * len(spider_fields)) + ') ON CONFLICT ON CONSTRAINT unique_event DO NOTHING;'
+            insert_event_sql = 'insert into events_event(' + ','.join(spider_fields) + ') VALUES (' + ','.join(['%s'] * len(spider_fields)) + ');'
 
-        store_uri = settings.get("IMAGES_STORE")
-        spider_name = crawler.spider.name
-        return cls(store_uri, settings=settings, spider_name=spider_name)
+            values = []
+            for field in spider_fields:
+                values.append(item[field])
+            self.cur.execute(insert_event_sql,values)
+            print('success')
+        except Exception as inst:
+            print('failed')
+            self.cur.execute("ROLLBACK")
 
-    def __init__(self, *args, **kwargs):
-        self.spider_name = kwargs.pop('spider_name', None)
-        super(CustomImagePipeLine, self).__init__(*args, **kwargs)
+            print(type(inst))  # the exception instance
+            print(inst.args)  # arguments stored in .args
+            print(inst)
+            print('Fail to write to db')
 
-    def get_media_requests(self, item, info):
-        image_urls = item.get(self.images_urls_field, [])
-        requests_list = []
-        for idx, image_url in enumerate(image_urls.split(" | "), 0):
-            request = Request(image_url, meta={
-                "file_name": image_url.strip("/").split("/")[-1],
-            })
-            requests_list.append(request)
-        return requests_list
-
-    def file_path(self, request, response=None, info=None):
-        path = "{}/{}".format(
-            self.spider_name,
-            request.meta['file_name']
-        )
-        return path
+        self.connection.commit()
+        return item

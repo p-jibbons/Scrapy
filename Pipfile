@@ -8,6 +8,8 @@ verify_ssl = true
 [packages]
 requests = "*"
 boto3 = "*"
+psycopg2 = "*"
+mysql = "*"
 
 [requires]
 python_version = "3.6"
