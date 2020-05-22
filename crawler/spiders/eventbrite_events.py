@@ -62,7 +62,7 @@ class eventbrite_events(Spider):
         sidebar = response.xpath('.//div[@class="event-details hide-small"]')
 
         # need to extract from previous page
-        # venue_neighbourhood = response.meta.extract_first('venue_neighbourhood')
+        # venue_neighbourhood = response.meta.get('venue_neighbourhood')
 
         date_time_tuple = sidebar.xpath('.//div[@class="event-details__data"]/meta/@content').extract()
         if len(date_time_tuple)==2:
@@ -123,7 +123,7 @@ class eventbrite_events(Spider):
         #
 
 
-        event_datetime_string = response.meta.extract_first('event_datetime_string')
+        event_datetime_string = response.meta.get('event_datetime_string')
 
         #
         venue_name = response.xpath('//a[@class="js-d-scroll-to listing-organizer-name text-default"]/text()').extract_first(default='By ').strip()[3:]
