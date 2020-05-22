@@ -31,8 +31,8 @@ class eventbrite_events(Spider):
 
         for event in event_list:
             event_card = event.xpath('.//div[@class="eds-event-card-content__content__principal"]')
-            event_datetime_string = event_card.xpath('.//div[@class="eds-text-color--primary-brand eds-l-pad-bot-1 eds-text-weight--heavy eds-text-bs"]/text()').get(default = '')
-            event_title = event_card.xpath('.//div[@data-spec="event-card__formatted-name--content"]/text()').get(default='')
+            event_datetime_string = event_card.xpath('.//div[@class="eds-text-color--primary-brand eds-l-pad-bot-1 eds-text-weight--heavy eds-text-bs"]/text()').extract_first(default = '')
+            event_title = event_card.xpath('.//div[@data-spec="event-card__formatted-name--content"]/text()').extract_first(default='')
 
 
             scrape_source_url = event_card.xpath('.//a[@class="eds-event-card-content__action-link"]/@href').extract_first()
@@ -56,15 +56,15 @@ class eventbrite_events(Spider):
 
 
     def parse_page(self, response):
-        event_title = response.meta.get('event_title')
+        event_title = response.meta.extract_first('event_title')
         # print(event_title)
         # print(response)
         sidebar = response.xpath('.//div[@class="event-details hide-small"]')
 
-        # need to get from previous page
-        # venue_neighbourhood = response.meta.get('venue_neighbourhood')
+        # need to extract from previous page
+        # venue_neighbourhood = response.meta.extract_first('venue_neighbourhood')
 
-        date_time_tuple = sidebar.xpath('.//div[@class="event-details__data"]/meta/@content').getall()
+        date_time_tuple = sidebar.xpath('.//div[@class="event-details__data"]/meta/@content').extract()
         if len(date_time_tuple)==2:
             start_date = dateutil.parser.isoparse(date_time_tuple[0]).strftime("%Y-%m-%d")
             end_date = dateutil.parser.isoparse(date_time_tuple[1]).strftime("%Y-%m-%d")
@@ -77,17 +77,17 @@ class eventbrite_events(Spider):
             end_time = None
 
 
-        absolute_url = response.meta.get('absolute_url')
-        # events_date = response.meta.get('events_date')
+        absolute_url = response.meta.extract_first('absolute_url')
+        # events_date = response.meta.extract_first('events_date')
 
-        event_description = response.xpath('//div[contains(@class,"has-user-generated-content")]//text()').getall()
+        event_description = response.xpath('//div[contains(@class,"has-user-generated-content")]//text()').extract()
 
         event_description = [item for item in event_description if item not in [ 'Read more','\t','Read less']]
         event_description= ''.join(event_description)
         event_description = re.sub('\t', '', event_description).strip()
 
 
-        cost_string = response.xpath('.//div[@class="js-display-price"]/text()').get()
+        cost_string = response.xpath('.//div[@class="js-display-price"]/text()').extract_first()
         if cost_string:
             cost_string = cost_string.strip()
 
@@ -114,7 +114,7 @@ class eventbrite_events(Spider):
                 cost_is_free = True
 
         #need to verify with more scraping
-        # age_restrictions_string = response.xpath('//span[@class="text-body-medium text-body--faint"]/text()').getall()
+        # age_restrictions_string = response.xpath('//span[@class="text-body-medium text-body--faint"]/text()').extract()
         # if len(age_restrictions_string) > 0:
         #     age_restrictions_string = details.xpath(
         #         '//li/strong[text()="Age limit:"]/following-sibling::span/text()').extract_first()
@@ -123,16 +123,16 @@ class eventbrite_events(Spider):
         #
 
 
-        event_datetime_string = response.meta.get('event_datetime_string')
+        event_datetime_string = response.meta.extract_first('event_datetime_string')
 
         #
-        venue_name = response.xpath('//a[@class="js-d-scroll-to listing-organizer-name text-default"]/text()').get(default='By ').strip()[3:]
+        venue_name = response.xpath('//a[@class="js-d-scroll-to listing-organizer-name text-default"]/text()').extract_first(default='By ').strip()[3:]
 
 
         # venue_address_string = response.xpath('//h3[text()="Location"]/following-sibling::div/p/text()')
         venue_address_string = response.xpath('//h3[text()="Location"]/following-sibling::div')
         if len(venue_address_string)>0:
-            venue_address_string = venue_address_string.xpath('.//p/text()').getall()
+            venue_address_string = venue_address_string.xpath('.//p/text()').extract()
             if "\n\t\t\t\t\t\t\t\t\t\t" in venue_address_string:
                 cutoff = venue_address_string.index("\n\t\t\t\t\t\t\t\t\t\t")
                 venue_address_string = venue_address_string[0:cutoff]
@@ -145,20 +145,20 @@ class eventbrite_events(Spider):
             venue_postal_code = re.search(regex, venue_address_string).group(0)
         else:
             venue_postal_code = ''
-        venue_gmap_url = response.xpath('.//a[@class="listing-map-link js-listing-map-link btn btn--dynamo"]/@href').get(default='').replace(" ", "+")
+        venue_gmap_url = response.xpath('.//a[@class="listing-map-link js-listing-map-link btn btn--dynamo"]/@href').extract_first(default='').replace(" ", "+")
         buy_tickets_url = absolute_url
 
 
         tickets_by = u'eventbrite'
 
-        venue_latitude = response.xpath('.//meta[@property="event:location:latitude"]/@content').get(default='')
-        venue_longitude = response.xpath('.//meta[@property="event:location:longitude"]/@content').get(default='')
+        venue_latitude = response.xpath('.//meta[@property="event:location:latitude"]/@content').extract_first(default='')
+        venue_longitude = response.xpath('.//meta[@property="event:location:longitude"]/@content').extract_first(default='')
 
 
 
 
 
-        image_original_url= response.xpath('//div[@class= "listing-hero listing-hero--bkg clrfix fx--delay-6 fx--fade-in"]/picture/@content').get()
+        image_original_url= response.xpath('//div[@class= "listing-hero listing-hero--bkg clrfix fx--delay-6 fx--fade-in"]/picture/@content').extract_first()
         # print(image_original_url)
 
 
