@@ -13,7 +13,7 @@ import re
 
 
 class eventbrite_events(Spider):
-    name = "eventbrite_events"
+    name = "eventbrite"
     # allowed_domains = ['eventbrite.com','img.evbuc.com','evbuc.com']
 
     start_date_short =(date.today()).strftime("%Y-%m-%d")
