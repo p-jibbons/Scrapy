@@ -90,7 +90,7 @@ class CrawlerPipeline(object):
                                 'cost_min_extract',
                                 'cost_max_extract',
                                 'cost_is_free',
-                                'age_restrictions_string',
+                                # 'age_restrictions_string',
                                 'spider_name',
                                 'spider_scrape_datetime',
                                 'date_added'

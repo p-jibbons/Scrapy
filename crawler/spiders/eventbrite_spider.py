@@ -196,7 +196,7 @@ class eventbrite_spider(Spider):
         items['cost_min_extract'] = cost_min_extract
         items['cost_max_extract'] = cost_max_extract
         items['cost_is_free'] = cost_is_free
-        items['age_restrictions_string'] = ''
+        items['age_restrictions_string'] = 'as'
 
         items['spider_name'] = self.name
         items['spider_scrape_datetime'] = datetime.now()
