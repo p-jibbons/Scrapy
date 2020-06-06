@@ -52,12 +52,12 @@ class CrawlerPipeline(object):
         else:
             item['image_original_url'] = ''
 
-        if item.get('image_s3_url')[0]:
-            thisdict = item.get('image_s3_url')[0]
-            item['image_s3_url'] = thisdict["path"]
-            print(item['image_s3_url'])
-        else:
-            item['image_s3_url'] = ''
+        # if item.get('image_s3_url')[0]:
+        #     thisdict = item.get('image_s3_url')[0]
+        #     item['image_s3_url'] = thisdict["path"]
+        #     print(item['image_s3_url'])
+        # else:
+        item['image_s3_url'] = ''
 
 
         try:
