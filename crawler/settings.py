@@ -12,7 +12,7 @@ NEWSPIDER_MODULE = 'crawler.spiders'
 import  datetime
 today = datetime.date.today()
 FEED_FORMAT = 'csv'
-FEED_URI = 's3://relayplay-prebackend/ev_scrapedata/' + today.strftime("%Y/%m/%d") + '/eventbrite_events.csv'
+FEED_URI = 's3://relayplay-prebackend/ev_scrapedata/' + today.strftime("%Y/%m/%d") + '/eventbrite_spider.csv'
 IMAGES_STORE = 's3://relayplay-prebackend/images'
 
 IMAGES_URLS_FIELD = 'image_original_url'
@@ -21,7 +21,7 @@ IMAGES_RESULT_FIELD = 'image_s3_url'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
-CLOSESPIDER_PAGECOUNT = 2000
+CLOSESPIDER_PAGECOUNT = 2
 
 
 
@@ -125,7 +125,7 @@ USER_AGENT_LIST = [
 # Configure item pipelines
 ITEM_PIPELINES = {
 	'scrapy.pipelines.images.ImagesPipeline': 100,
-    'crawler.pipelines.CrawlerPipeline': 300,
+    'crawler.spiders.eventbrite_pipelines.CrawlerPipeline': 300,
 }
 
 

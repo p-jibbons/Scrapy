@@ -12,7 +12,7 @@ import re
 
 
 
-class eventbrite_events(Spider):
+class eventbrite_spider(Spider):
     name = "eventbrite"
     # allowed_domains = ['eventbrite.com','img.evbuc.com','evbuc.com']
 
