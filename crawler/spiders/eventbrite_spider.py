@@ -8,24 +8,15 @@ from urllib.parse import urlparse
 import dateutil.parser
 import re
 
-
-
-
-
 class eventbrite_spider(Spider):
-    name = "eventbrite"
+    name = "eventbrite_spider"
     # allowed_domains = ['eventbrite.com','img.evbuc.com','evbuc.com']
-
     start_date_short =(date.today()).strftime("%Y-%m-%d")
     end_date_short = (date.today()+ timedelta(days = 10)).strftime("%Y-%m-%d")
-    i=1
     url_start =f"https://www.eventbrite.com/d/ca--san-diego/all-events/?start_date={start_date_short}&end_date={end_date_short}&page=1"
     start_urls = [url_start]
-
+    i = 1
     def parse(self, response):
-        print("scraping")
-
-
 
         event_list = response.xpath('.//ul[@class="search-main-content__events-list"]/li')
 
@@ -33,10 +24,7 @@ class eventbrite_spider(Spider):
             event_card = event.xpath('.//div[@class="eds-event-card-content__content__principal"]')
             event_datetime_string = event_card.xpath('.//div[@class="eds-text-color--primary-brand eds-l-pad-bot-1 eds-text-weight--heavy eds-text-bs"]/text()').extract_first(default = '')
             event_title = event_card.xpath('.//div[@data-spec="event-card__formatted-name--content"]/text()').extract_first(default='')
-
-
             scrape_source_url = event_card.xpath('.//a[@class="eds-event-card-content__action-link"]/@href').extract_first()
-            # print(scrape_source_url)
             absolute_url= urlparse(scrape_source_url).netloc + urlparse(scrape_source_url).path
 
             yield Request(scrape_source_url, callback=self.parse_page,
@@ -57,11 +45,9 @@ class eventbrite_spider(Spider):
 
     def parse_page(self, response):
         event_title = response.meta.get('event_title')
-        print(event_title)
-        # print(response)
         sidebar = response.xpath('.//div[@class="event-details hide-small"]')
 
-        # need to extract from previous page
+        # TODO need to extract from previous page
         # venue_neighbourhood = response.meta.get('venue_neighbourhood')
 
         date_time_tuple = sidebar.xpath('.//div[@class="event-details__data"]/meta/@content').extract()
@@ -95,7 +81,7 @@ class eventbrite_spider(Spider):
 
             numbers = re.findall('\d+', cost_string)
 
-            # dont know why this line doesnt work, the re expression already converted them to ints?
+            # FIXME dont know why this line doesnt work, the re expression already converted them to ints?
             # numbers = map(int, numbers)
             cost_min_extract = None
             cost_max_extract = None
@@ -113,23 +99,16 @@ class eventbrite_spider(Spider):
                 cost_min_extract = 0
                 cost_is_free = True
 
-        #need to verify with more scraping
+        # TODO need to verify with more scraping
         # age_restrictions_string = response.xpath('//span[@class="text-body-medium text-body--faint"]/text()').extract()
         # if len(age_restrictions_string) > 0:
         #     age_restrictions_string = details.xpath(
         #         '//li/strong[text()="Age limit:"]/following-sibling::span/text()').extract_first()
         # else:
         #     age_restrictions_string = ''
-        #
-
 
         event_datetime_string = response.meta.get('event_datetime_string')
-
-        #
         venue_name = response.xpath('//a[@class="js-d-scroll-to listing-organizer-name text-default"]/text()').extract_first(default='By ').strip()[3:]
-
-
-        # venue_address_string = response.xpath('//h3[text()="Location"]/following-sibling::div/p/text()')
         venue_address_string = response.xpath('//h3[text()="Location"]/following-sibling::div')
         if len(venue_address_string)>0:
             venue_address_string = venue_address_string.xpath('.//p/text()').extract()
@@ -137,8 +116,6 @@ class eventbrite_spider(Spider):
                 cutoff = venue_address_string.index("\n\t\t\t\t\t\t\t\t\t\t")
                 venue_address_string = venue_address_string[0:cutoff]
             venue_address_string = '\n'.join(venue_address_string)
-
-
 
         regex = re.compile(u'\d{5}')
         if venue_address_string and re.search(regex, venue_address_string):
@@ -154,21 +131,12 @@ class eventbrite_spider(Spider):
         venue_latitude = response.xpath('.//meta[@property="event:location:latitude"]/@content').extract_first(default='')
         venue_longitude = response.xpath('.//meta[@property="event:location:longitude"]/@content').extract_first(default='')
 
-
-
-
-
         image_original_url= response.xpath('//div[@class= "listing-hero listing-hero--bkg clrfix fx--delay-6 fx--fade-in"]/picture/@content').extract_first()
-        # print(image_original_url)
-
-
 
         items = eventPageItem()
         items['event_title'] = event_title
         items['event_description'] = event_description
         items['image_original_url'] = [image_original_url]
-        # items['image_urls'] = [image_original_url]
-
         items['start_date'] = start_date
         items['end_date'] = end_date
         items['start_time'] = start_time
@@ -179,7 +147,6 @@ class eventbrite_spider(Spider):
         items['buy_tickets_url'] = buy_tickets_url
         items['tickets_by'] = tickets_by
         items['tickets_sold_out'] = False
-
         items['venue_name'] = venue_name
         # items['venue_url'] = venue_url
         items['venue_address_string'] = venue_address_string
@@ -189,15 +156,13 @@ class eventbrite_spider(Spider):
         items['venue_postal_code'] = venue_postal_code
         items['venue_latitude'] = venue_latitude
         items['venue_longitude'] = venue_longitude
-
         # items['venue_neighbourhood'] = venue_neighbourhood
         items['venue_gmap_url'] = venue_gmap_url
         items['cost_string'] = cost_string
         items['cost_min_extract'] = cost_min_extract
         items['cost_max_extract'] = cost_max_extract
         items['cost_is_free'] = cost_is_free
-        items['age_restrictions_string'] = 'as'
-
+        items['age_restrictions_string'] = ''
         items['spider_name'] = self.name
         items['spider_scrape_datetime'] = datetime.now()
         items['date_added'] = date.today()
