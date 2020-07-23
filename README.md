@@ -1,2 +1,2 @@
-# Spiders to populate the relayplay django application
+# Spiders to populate a django application
 A set of spiders written in python using the scrapy framework
